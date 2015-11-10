@@ -1,0 +1,4 @@
+name = Import Help Text
+description = Import help/description text for fields
+package = Custom
+core = 7.x

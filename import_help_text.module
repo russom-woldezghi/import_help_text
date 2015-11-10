@@ -1,0 +1,78 @@
+<?php
+
+/**
+ * Implements hook_menu().
+ */
+function import_help_text_menu() {
+  $items['admin/structure/import-help-text'] = array(
+    'title' => 'Import Help Text',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('_admin_import_help_text'),
+    'access arguments' => array('administer content types'),
+    );
+  return $items;
+}
+
+function _admin_import_help_text($form, &$form_state, $no_js_use = FALSE){
+
+  $get_entity = entity_get_info();
+  // dpm($get_entity);
+  $entity_list = array();
+  foreach ($get_entity as $key => $value) {
+    // dpm($value);
+    $entity_list[$key] = $value['label'];
+  }
+  // dpm($entity_list);
+  $form['entity_type_select'] = array(
+    '#type' => 'select',
+    '#title' => t('Entity'),
+    '#default_value' => '- Choose Entity -',
+    '#options' =>  $entity_list,
+    '#ajax' => array(
+      'wrapper' => 'questions-fieldset-wrapper',
+      'callback' => 'ajax_example_dynamic_entity_select_callback',
+      ),
+    );
+
+  $form['questions_fieldset'] = array(
+    '#type' => 'fieldset',
+    // These provide the wrapper referred to in #ajax['wrapper'] above.
+    '#prefix' => '<div id="questions-fieldset-wrapper">',
+    '#suffix' => '</div>',
+    );
+  $entity_selected = $form_state['values']['entity_type_select'];
+  $bundle = field_info_bundles($entity_selected);
+  $test = field_info_instances($entity_selected, $bundle);
+  dpm($test);
+  $fields_list = array();
+  foreach ($test as $key => $value) {
+    $fields_list[$key] = $value['label'];
+  }
+
+ $form['questions_fieldset']["checkbox"] = array(
+      '#type' => 'checkboxes',
+      '#options' => $fields_list,
+      '#title' => "Fields",
+      );
+
+
+ $instances = field_info_instances();
+ $field_types = field_info_field_types();
+ $bundles = field_info_bundles();
+
+ $fields = array($instances);
+ return $form;
+}
+
+/**
+ * Callback for the select element.
+ *
+ * This just selects and returns the questions_fieldset.
+ */
+function ajax_example_dynamic_entity_select_callback($form, $form_state) {
+  return $form['questions_fieldset'];
+}
+
+function ajax_example_dynamic_entity_select_callback_test() {
+  return 'test';
+}
